@@ -815,6 +815,52 @@ function expandIncome(rangeStart, rangeEnd){
   });
   return out;
 }
+
+function expandInvestments(rangeStart, rangeEnd){
+  const out = [];
+  const today = new Date();
+
+  state.transactions.forEach(t => {
+    if (t.kind !== 'investment') return;
+
+    if (t.recurring) {
+      const orig = new Date(t.date);
+      const lastDay = isLastDayOfMonth(orig);
+      let cursor = new Date(orig.getFullYear(), orig.getMonth(), orig.getDate());
+
+      const limit = rangeEnd < today ? rangeEnd : today;
+
+      while (cursor <= limit) {
+        if (cursor >= rangeStart && cursor >= orig) {
+          out.push({
+            date: new Date(cursor),
+            category: t.category,
+            amount: Number(t.amount),
+            name: t.name,
+            location: t.location
+          });
+        }
+
+        cursor = addMonthsClamped(cursor, 1, lastDay);
+      }
+    } else {
+      const d = new Date(t.date);
+
+      if (d >= rangeStart && d <= rangeEnd) {
+        out.push({
+          date: d,
+          category: t.category,
+          amount: Number(t.amount),
+          name: t.name,
+          location: t.location
+        });
+      }
+    }
+  });
+
+  return out;
+}
+
 function sumBy(list, keyFn){
   const map = {};
   list.forEach(item=>{ const k = keyFn(item); map[k] = (map[k]||0) + item.amount; });
@@ -971,9 +1017,10 @@ function renderInvestments(){
   // One dataset per category, stacked — each period's bar shows its category breakdown.
   const datasets = INVESTMENT_CATEGORIES.map(cat => ({
     label: cat,
-    data: ranges.map(r => state.transactions
-      .filter(t => t.kind==='investment' && t.category===cat && new Date(t.date) >= r.start && new Date(t.date) <= r.end)
-      .reduce((s,x)=>s+Number(x.amount),0)),
+    data: ranges.map(r =>
+    expandInvestments(r.start, r.end)
+        .filter(x => x.category === cat)
+        .reduce((sum, x) => sum + x.amount, 0)),
     backgroundColor: INVESTMENT_COLORS[cat] || '#8A8270',
     borderRadius: 4
   }));
