@@ -406,6 +406,7 @@ footer.foot button{
     <button class="tab-btn" data-tab="household"><span class="num">04</span> Household</button>
     <button class="tab-btn" data-tab="investments"><span class="num">05</span> Investments</button>
 	<button class="tab-btn" data-tab="budgets"><span class="num">06</span> Budgets</button>
+	<button class="tab-btn" data-tab="cards"><span class="num">07</span> Cards</button>
   </nav>
 
   <main class="main">
@@ -631,6 +632,48 @@ footer.foot button{
         </div>
       </div>
     </section>
+	
+	<!-- CARDS -->
+	<section class="page" id="page-cards">
+		<h1 class="page-title">My Cards</h1>
+		<p class="page-sub">
+			Manage your credit cards and statement dates.
+		</p>
+		<div class="two-col">
+			<div class="card">
+				<h3>Add Card</h3>
+				<div class="form-grid">
+					<div class="field span2">
+						<label>Card Name</label>
+						<input id="card-name" placeholder="e.g. Garanti Bonus">
+					</div>
+					<div class="field span2">
+						<label>Bank</label>
+						<input id="card-bank" placeholder="e.g. Garanti BBVA">
+					</div>
+					<div class="field">
+						<label>Credit Limit (₺)</label>
+						<input id="card-limit" type="number">
+					</div>
+					<div class="field">
+						<label>Statement Closing Day</label>
+						<input id="card-statement" type="number" min="1" max="31">
+					</div>
+					<div class="field span2">
+						<label>Payment Grace Period (days)</label>
+						<input id="card-grace" type="number" value="10">
+					</div>
+				</div>
+				<button class="btn" id="card-add">
+					Add Card
+				</button>
+			</div>
+			<div class="card">
+				<h3>My Cards</h3>
+				<div id="card-list"></div>
+			</div>
+		</div>
+	</section>
 
   </main>
 </div>
@@ -649,7 +692,7 @@ const CATEGORY_COLORS = {
   'Credit Card Installments':'#A63A32','Health':'#8C4B3A','Other':'#8A8270'
 };
 
-let state = { transactions: [], budgets: {} };
+let state = { transactions: [], budgets: {}, cards: [] };
 let dash = { periodType:'month', offset:0, trend:'monthly', investTrend:'monthly' };
 let pieChart=null, lineChart=null, barChart=null;
 
@@ -674,8 +717,10 @@ function loadState() {
 
     if (saved) {
       const parsed = JSON.parse(saved);
+	  
       state.transactions = parsed.transactions || [];
       state.budgets = parsed.budgets || {};
+	  state.cards = parsed.cards || [];
     }
   } catch (e) {
     console.error("Failed to load data", e);
@@ -867,6 +912,105 @@ function sumBy(list, keyFn){
   return map;
 }
 
+// ---------- cards ----------
+function calculateDueDate(statementDay, graceDays = 10) {
+
+    const today = new Date();
+
+    let statement = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        statementDay
+    );
+
+    // invalid day (31 in February)
+
+    if (statement.getMonth() !== today.getMonth()) {
+
+        statement = new Date(
+            today.getFullYear(),
+            today.getMonth() + 1,
+            0
+        );
+    }
+
+    const due = new Date(statement);
+
+    due.setDate(due.getDate() + graceDays);
+
+    return due;
+
+}
+
+function formatCardDate(date){
+
+    return date.toLocaleDateString("en-GB",{
+        day:"numeric",
+        month:"short",
+        year:"numeric"
+    });
+
+}
+
+function addCard(card){
+
+    state.cards.push({
+
+        id:uid(),
+
+        name:card.name,
+
+        bank:card.bank,
+
+        statementDay:Number(card.statementDay),
+
+        graceDays:Number(card.graceDays || 10),
+
+        creditLimit:Number(card.creditLimit || 0)
+
+    });
+
+    saveState();
+
+    renderCards();
+
+}
+
+function deleteCard(id){
+
+    state.cards = state.cards.filter(c=>c.id!==id);
+
+    saveState();
+
+    renderCards();
+
+}
+
+function updateCard(updated){
+
+    const card = state.cards.find(c=>c.id===updated.id);
+
+    if(!card) return;
+
+    card.name = updated.name;
+
+    card.bank = updated.bank;
+
+    card.statementDay = Number(updated.statementDay);
+
+    card.graceDays = Number(updated.graceDays);
+
+    card.creditLimit = Number(updated.creditLimit);
+
+    saveState();
+
+    renderCards();
+
+}
+
+
+
+
 // ---------- rendering: lists ----------
 function ledgerRow(t, extraLabel){
   const isInvestment = t.kind==='investment';
@@ -1055,6 +1199,84 @@ function renderDashboardBudgets(){
   }).join('');
 }
 
+function renderCards(){
+
+    const container = document.getElementById("card-list");
+
+    if(state.cards.length===0){
+
+        container.innerHTML =
+        `<div class="empty">
+            No cards added.
+        </div>`;
+
+        return;
+
+    }
+
+    container.innerHTML =
+    state.cards.map(card=>{
+
+        const due = calculateDueDate(
+            card.statementDay,
+            card.graceDays
+        );
+
+        return `
+
+        <div class="ledger-row">
+
+            <span class="name">
+
+                <strong>${card.name}</strong>
+
+                <br>
+
+                <span style="font-size:11px;color:var(--ink-soft);">
+
+                    ${card.bank}
+
+                    · Statement ${card.statementDay}
+
+                    · Due ${formatCardDate(due)}
+
+                </span>
+
+            </span>
+
+            <span class="leader"></span>
+
+            <span class="amt">
+
+                ${card.creditLimit>0
+                    ? fmt(card.creditLimit)
+                    : "-"
+                }
+
+            </span>
+
+            <button
+                class="del"
+                data-card="${card.id}">
+                ✕
+            </button>
+
+        </div>
+
+        `;
+
+    }).join("");
+
+    container
+        .querySelectorAll("[data-card]")
+        .forEach(btn=>{
+
+            btn.onclick=()=>deleteCard(btn.dataset.card);
+
+        });
+
+}
+
 // ---------- rendering: budgets page ----------
 function renderBudgetForm(){
   const el = document.getElementById('budget-form');
@@ -1137,6 +1359,7 @@ function renderEverything(){
   renderList('inv-list','investment');
   renderBudgetsPage();
   renderDashboard();
+  renderCards();
 }
 
 // ---------- nav ----------
@@ -1237,6 +1460,53 @@ document.getElementById('inv-add').addEventListener('click', ()=>{
   saveState(); renderEverything();
   document.getElementById('inv-name').value=''; document.getElementById('inv-amount').value='';
   document.getElementById('inv-recurring').checked=false;
+});
+
+document.getElementById("card-add").addEventListener("click",()=>{
+
+    const name =
+        document.getElementById("card-name").value.trim();
+
+    const bank =
+        document.getElementById("card-bank").value.trim();
+
+    const statementDay =
+        Number(document.getElementById("card-statement").value);
+
+    const grace =
+        Number(document.getElementById("card-grace").value);
+
+    const limit =
+        Number(document.getElementById("card-limit").value);
+
+    if(!name || !bank || !statementDay){
+
+        alert("Please complete all required fields.");
+
+        return;
+
+    }
+
+    addCard({
+
+        name,
+
+        bank,
+
+        statementDay,
+
+        graceDays:grace,
+
+        creditLimit:limit
+
+    });
+
+    document.getElementById("card-name").value="";
+    document.getElementById("card-bank").value="";
+    document.getElementById("card-limit").value="";
+    document.getElementById("card-statement").value="";
+    document.getElementById("card-grace").value="10";
+
 });
 
 document.getElementById('reset-btn').addEventListener('click', ()=>{
