@@ -1,4 +1,12 @@
-function showToast(msg, isError) {
+import {
+    STORAGE_KEY,
+    DATA_VERSION,
+    state
+} from "./data.js";
+
+let toastTimer = null;
+
+export function showToast(msg, isError) {
   const el = document.getElementById('save-toast');
   el.textContent = msg;
   el.classList.toggle('error', !!isError);
@@ -10,7 +18,7 @@ function showToast(msg, isError) {
   }, isError ? 6000 : 1400);
 }
 
-function loadState() {
+export function loadState() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
 
@@ -31,11 +39,9 @@ function loadState() {
   } catch (e) {
     console.error("Failed to load data", e);
   }
-
-  renderEverything();
 }
 
-function saveState() {
+export function saveState() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     showToast("Saved");
@@ -48,7 +54,7 @@ function saveState() {
 function migrateData(data) {
 
   // Version 0 (or no version) -> Version 1
-  if (!data.version || data.version < 1) {
+  if ((!data.version ?? 0 ) < DATA_VERSION) {
 
     // Ensure all collections exist
     if (!Array.isArray(data.transactions)) {
@@ -63,10 +69,8 @@ function migrateData(data) {
       data.cards = [];
     }
 
-    data.version = 1;
+    data.version = DATA_VERSION;
   }
 
   return data;
 }
-
-import { DATA_VERSION } from "./data.js";

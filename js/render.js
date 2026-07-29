@@ -5,16 +5,45 @@ import {
 } from "./recurring.js";
 
 import {
+    state,
+    dash,
+    charts,
+    CATEGORIES,
+    CATEGORY_COLORS,
     INVESTMENT_CATEGORIES,
     INVESTMENT_COLORS
 } from "./data.js";
 
 import {
-    populateCardSelects
+    populateCardSelects,
+    deleteCard,
 } from "./cards.js";
 
+import {
+    saveState,
+    showToast
+} from "./storage.js";
+
+import {
+    fmt,
+    sumBy,
+
+    currentRange,
+    periodLabel,
+
+    getWeekRange,
+    getMonthRange,
+    getYearRange,
+
+    calculateDueDate,
+    formatCardDate,
+
+    isLastDayOfMonth,
+    addMonthsClamped
+} from "./utils.js";
+
 // ---------- rendering: lists ----------
-function ledgerRow(t, extraLabel){
+export function ledgerRow(t){
   const isInvestment = t.kind==='investment';
   const color = isInvestment ? (INVESTMENT_COLORS[t.category] || '#3C6E8F') : (CATEGORY_COLORS[t.category] || '#8A8270');
   const amt = t.kind==='income' ? Number(t.amount) : (t.kind==='installment' ? Number(t.totalAmount) : Number(t.amount));
@@ -35,7 +64,8 @@ function ledgerRow(t, extraLabel){
       <button class="del" data-id="${t.id}" title="Delete">✕</button>
     </div>`;
 }
-function renderList(containerId, kind){
+
+export function renderList(containerId, kind){
   const el = document.getElementById(containerId);
   const items = state.transactions.filter(t=>t.kind===kind).sort((a,b)=> new Date(b.date||b.startDate) - new Date(a.date||a.startDate));
   if(items.length===0){ el.innerHTML = `<div class="empty">Nothing here yet.</div>`; return; }
@@ -48,7 +78,7 @@ function renderList(containerId, kind){
 }
 
 // ---------- rendering: dashboard ----------
-function renderDashboard(){
+export function renderDashboard(){
   const {start,end} = currentRange();
   document.getElementById('period-label').textContent = periodLabel();
 
@@ -63,7 +93,7 @@ function renderDashboard(){
   // pie
   const byCat = sumBy(expenseList, i=>i.category);
   const cats = Object.keys(byCat);
-  if(pieChart){ try{ pieChart.destroy(); }catch(e){} }
+  if(charts.pie){ try{ charts.pie.destroy(); }catch(e){} }
   if(cats.length===0){
     document.getElementById('pie-legend').innerHTML = `<div class="empty">No expenses in this period.</div>`;
   } else {
@@ -79,7 +109,7 @@ function renderDashboard(){
       </div>`).join('');
     try{
       const pieCtx = document.getElementById('pie-chart').getContext('2d');
-      pieChart = new Chart(pieCtx, {
+      charts.pie = new Chart(pieCtx, {
         type:'doughnut',
         data:{ labels:cats, datasets:[{ data:cats.map(c=>byCat[c]), backgroundColor:cats.map(c=>CATEGORY_COLORS[c]||'#8A8270'), borderColor:'#F8F4E9', borderWidth:2 }] },
         options:{ plugins:{ legend:{ display:false } }, cutout:'62%', maintainAspectRatio:false }
@@ -95,9 +125,9 @@ function renderDashboard(){
   try{ renderDashboardBudgets(); }catch(e){ console.error('Budget summary failed', e); }
 }
 
-function renderTrend(){
+export function renderTrend(){
   const lineCtx = document.getElementById('line-chart').getContext('2d');
-  if(lineChart) lineChart.destroy();
+  if(charts.line) charts.line.destroy();
   let labels=[], incomeData=[], expenseData=[];
   if(dash.trend==='weekly'){
     for(let i=-7;i<=0;i++){
@@ -114,7 +144,7 @@ function renderTrend(){
       expenseData.push(expandExpenses(r.start,r.end).reduce((s,x)=>s+x.amount,0));
     }
   }
-  lineChart = new Chart(lineCtx, {
+  charts.line = new Chart(lineCtx, {
     type:'line',
     data:{ labels, datasets:[
       { label:'Income', data:incomeData, borderColor:'#2F6F4E', backgroundColor:'rgba(47,111,78,0.08)', tension:0.3, fill:true, pointRadius:3 },
@@ -131,9 +161,9 @@ function renderTrend(){
   });
 }
 
-function renderInvestments(){
+export function renderInvestments(){
   const barCtx = document.getElementById('bar-chart').getContext('2d');
-  if(barChart) barChart.destroy();
+  if(charts.bar) charts.bar.destroy();
   let labels=[], ranges=[];
 
   if(dash.investTrend==='weekly'){
@@ -167,7 +197,7 @@ function renderInvestments(){
     borderRadius: 4
   }));
 
-  barChart = new Chart(barCtx, {
+  charts.bar = new Chart(barCtx, {
     type:'bar',
     data:{ labels, datasets },
     options:{
@@ -181,7 +211,7 @@ function renderInvestments(){
   });
 }
 
-function renderDashboardBudgets(){
+export function renderDashboardBudgets(){
   const r = getMonthRange(0);
   const byCat = sumBy(expandExpenses(r.start,r.end), i=>i.category);
   const withBudget = CATEGORIES.filter(c=>state.budgets[c] > 0);
@@ -197,8 +227,7 @@ function renderDashboardBudgets(){
   }).join('');
 }
 
-function renderCards(){
-
+export function renderCards(){
     const container = document.getElementById("card-list");
 
     if(state.cards.length===0){
@@ -269,17 +298,17 @@ function renderCards(){
         .querySelectorAll("[data-card]")
         .forEach(btn=>{
 
-            btn.onclick=()=>{
-              deleteCard(btn.dataset.card);
-              saveState();
-              renderCards();
-            };
+            btn.onclick = () => {
+            deleteCard(btn.dataset.card);
+            saveState();
+            renderEverything();
+          };
         });
 
 }
 
 // ---------- rendering: budgets page ----------
-function renderBudgetForm(){
+export function renderBudgetForm(){
   const el = document.getElementById('budget-form');
   el.innerHTML = CATEGORIES.map(c=>`
     <div class="budget-input-row">
@@ -295,7 +324,7 @@ function renderBudgetForm(){
   });
 }
 
-function renderBudgetProgress(){
+export function renderBudgetProgress(){
   const r = getMonthRange(0);
   const byCat = sumBy(expandExpenses(r.start,r.end), i=>i.category);
   const withBudget = CATEGORIES.filter(c=>state.budgets[c] > 0);
@@ -315,10 +344,10 @@ function renderBudgetProgress(){
   }).join('');
 }
 
-function renderBudgetsPage(){ renderBudgetForm(); renderBudgetProgress(); }
+export function renderBudgetsPage(){ renderBudgetForm(); renderBudgetProgress(); }
 
 // ---------- installments list (custom, shows progress) ----------
-function renderInstallments(){
+export function renderInstallments(){
   const el = document.getElementById('ins-list');
   const items = state.transactions.filter(t=>t.kind==='installment').sort((a,b)=> new Date(b.startDate)-new Date(a.startDate));
   if(items.length===0){ el.innerHTML = `<div class="empty">No active installment plans.</div>`; return; }
@@ -353,7 +382,7 @@ function renderInstallments(){
 }
 
 // ---------- master render ----------
-function renderEverything(){
+export function renderEverything(){
   renderList('inc-list','income');
   renderList('pur-list','purchase');
   renderInstallments();
@@ -362,7 +391,7 @@ function renderEverything(){
   renderBudgetsPage();
   renderDashboard();
   renderCards();
-  populateCardSelect();
+  populateCardSelects();
 }
 
 

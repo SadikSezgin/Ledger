@@ -1,4 +1,4 @@
-import { state, dash, STORAGE_KEY } from "./data.js";
+import { state, dash } from "./data.js";
 
 import { uid, todayStr } from "./utils.js";
 
@@ -12,6 +12,11 @@ import {
     renderTrend,
     renderInvestments
 } from "./render.js";
+
+function refresh () {
+    renderEverything();
+    saveState();
+}
 
 // ---------- nav ----------
 document.querySelectorAll('.tab-btn').forEach(btn=>{
@@ -63,7 +68,7 @@ document.getElementById('inc-add').addEventListener('click', ()=>{
   const recurring = document.getElementById('inc-recurring').checked;
   if(!name || !amount){ alert('Add a source name and amount.'); return; }
   state.transactions.push({ id:uid(), kind:'income', name, category, amount, date, recurring });
-  saveState(); renderEverything();
+  refresh();
   document.getElementById('inc-name').value=''; document.getElementById('inc-amount').value='';
   document.getElementById('inc-recurring').checked=false;
 });
@@ -74,8 +79,8 @@ document.getElementById('pur-add').addEventListener('click', ()=>{
   const date = document.getElementById('pur-date').value || todayStr();
   const category = document.getElementById('pur-category').value;
   if(!name || !amount){ alert('Add an item name and amount.'); return; }
-  state.transactions.push({ id:uid(), kind:'purchase', name, category, amount, date });
-  saveState(); renderEverything();
+  state.transactions.push({ id:uid(), kind:'purchase', name, category, amount, date, paymentMethod, cardId});
+  refresh();
   document.getElementById('pur-name').value=''; document.getElementById('pur-amount').value='';
 });
 
@@ -86,8 +91,8 @@ document.getElementById('ins-add').addEventListener('click', ()=>{
   const startDate = document.getElementById('ins-date').value || todayStr();
   const category = document.getElementById('ins-category').value;
   if(!name || !totalAmount){ alert('Add an item name and total amount.'); return; }
-  state.transactions.push({ id:uid(), kind:'installment', name, category, totalAmount, count, startDate });
-  saveState(); renderEverything();
+  state.transactions.push({ id:uid(), kind:'installment', name, category, totalAmount, count, startDate, paymentMethod, cardId});
+  refresh();
   document.getElementById('ins-name').value=''; document.getElementById('ins-total').value=''; document.getElementById('ins-count').value='1';
 });
 
@@ -99,7 +104,7 @@ document.getElementById('hh-add').addEventListener('click', ()=>{
   const recurring = document.getElementById('hh-recurring').checked;
   if(!name || !amount){ alert('Add a name and amount.'); return; }
   state.transactions.push({ id:uid(), kind:'household', name, category, amount, date, recurring });
-  saveState(); renderEverything();
+  refresh();
   document.getElementById('hh-name').value=''; document.getElementById('hh-amount').value='';
 });
 
@@ -112,7 +117,7 @@ document.getElementById('inv-add').addEventListener('click', ()=>{
   const recurring = document.getElementById('inv-recurring').checked;
   if(!name || !amount){ alert('Add a source name and amount.'); return; }
   state.transactions.push({ id:uid(), kind:'investment', name, category, location, amount, date, recurring });
-  saveState(); renderEverything();
+  refresh();
   document.getElementById('inv-name').value=''; document.getElementById('inv-amount').value='';
   document.getElementById('inv-recurring').checked=false;
 });
@@ -142,8 +147,7 @@ document.getElementById("card-add").addEventListener("click",()=>{
         creditLimit:limit
     });
 
-    saveState();
-    renderEverything();
+    refresh();
 
     document.getElementById("card-name").value="";
     document.getElementById("card-bank").value="";
@@ -163,8 +167,7 @@ document.getElementById("reset-btn").addEventListener("click", () => {
     state.budgets = {};
     state.cards = [];
 
-    saveState();
-    renderEverything();
+    refresh();
 
 });
 

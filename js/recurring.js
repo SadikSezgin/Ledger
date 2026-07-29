@@ -1,3 +1,10 @@
+import { state } from "./data.js";
+
+import {
+    isLastDayOfMonth,
+    addMonthsClamped
+} from "./utils.js";
+
 // ---------- expansion (recurring / installments -> occurrences) ----------
 function expandExpenses(rangeStart, rangeEnd){
   const out = [];
