@@ -9,7 +9,12 @@ import {
     loadState
 } from "./storage.js";
 
+import {
+    renderEverything
+} from "./render.js";
+
 // ---------- init ----------
 populateCategorySelects();
 setDefaultDates();
 loadState();
+renderEverything();

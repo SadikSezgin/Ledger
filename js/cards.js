@@ -1,7 +1,7 @@
 import { state } from "./data.js";
 import { uid } from "./utils.js";
 
-function populateCardSelects() {
+export function populateCardSelects() {
 
     const selects = [
         document.getElementById("pur-card"),
@@ -10,7 +10,7 @@ function populateCardSelects() {
 
     selects.forEach(select => {
 
-        if(!select) return;
+        if (!select) return;
 
         select.replaceChildren();
 
@@ -30,27 +30,27 @@ function populateCardSelects() {
 
 }
 
-export function addCard(card){
+export function addCard(card) {
     state.cards.push({
-        id:uid(),
-        name:card.name,
-        bank:card.bank,
-        statementDay:Number(card.statementDay),
-        graceDays:Number(card.graceDays || 10),
-        creditLimit:Number(card.creditLimit || 0)
+        id: uid(),
+        name: card.name,
+        bank: card.bank,
+        statementDay: Number(card.statementDay),
+        graceDays: Number(card.graceDays || 10),
+        creditLimit: Number(card.creditLimit || 0)
     });
 }
 
-export function deleteCard(id){
-    state.cards = state.cards.filter(c=>c.id!==id);
+export function deleteCard(id) {
+    state.cards = state.cards.filter(c => c.id !== id);
 }
 
-export function updateCard(updated){
+export function updateCard(updated) {
 
-    const card = state.cards.find(c=>c.id===updated.id);
+    const card = state.cards.find(c => c.id === updated.id);
 
     if (index !== -1) {
-    state.cards.splice(index, 1);
+        state.cards.splice(index, 1);
     }
 
     card.name = updated.name;

@@ -1,7 +1,7 @@
 import {
-    STORAGE_KEY,
-    DATA_VERSION,
-    state
+  STORAGE_KEY,
+  DATA_VERSION,
+  state
 } from "./data.js";
 
 let toastTimer = null;
@@ -54,7 +54,7 @@ export function saveState() {
 function migrateData(data) {
 
   // Version 0 (or no version) -> Version 1
-  if ((!data.version ?? 0 ) < DATA_VERSION) {
+  if ((!data.version ?? 0) < DATA_VERSION) {
 
     // Ensure all collections exist
     if (!Array.isArray(data.transactions)) {
