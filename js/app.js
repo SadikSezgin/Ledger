@@ -3,11 +3,11 @@ import "./events.js";
 import {
     populateCategorySelects,
     setDefaultDates
-} from "./utils.js";
+} from "./ui/forms.js";
 
 import {
     loadState
-} from "./storage.js";
+} from "./storage/localStorage.js";
 
 import {
     renderEverything

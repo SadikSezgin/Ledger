@@ -1,9 +1,5 @@
-import { state } from "../data.js";
-
-import {
-    isLastDayOfMonth,
-    addMonthsClamped
-} from "../utils.js";
+import { state } from "../state/state.js";
+import { isLastDayOfMonth, addMonthsClamped } from "../services/dates.js";
 
 // ---------- expansion (recurring / installments -> occurrences) ----------
 export function expandExpenses(rangeStart, rangeEnd) {

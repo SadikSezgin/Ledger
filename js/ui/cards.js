@@ -1,5 +1,10 @@
-import { state } from "../data.js";
-import { uid } from "../utils.js";
+import { state } from "../state/state.js";
+import { uid, formatCardDate } from "../utils/helpers.js";
+import { calculateDueDate } from "../services/dates.js";
+import { saveState } from "../storage/localStorage.js";
+import { renderEverything } from "../render.js";
+import { fmt } from "../utils/helpers.js";
+
 
 export function populateCardSelects() {
 
@@ -58,4 +63,84 @@ export function updateCard(updated) {
     card.statementDay = Number(updated.statementDay);
     card.graceDays = Number(updated.graceDays);
     card.creditLimit = Number(updated.creditLimit);
+}
+
+export function renderCards() {
+  const container = document.getElementById("card-list");
+
+  if (state.cards.length === 0) {
+
+    container.innerHTML =
+      `<div class="empty">
+            No cards added.
+        </div>`;
+
+    return;
+
+  }
+
+  container.innerHTML =
+    state.cards.map(card => {
+
+      const due = calculateDueDate(
+        card.statementDay,
+        card.graceDays
+      );
+
+      return `
+
+        <div class="ledger-row">
+
+            <span class="name">
+
+                <strong>${card.name}</strong>
+
+                <br>
+
+                <span style="font-size:11px;color:var(--ink-soft);">
+
+                    ${card.bank}
+
+                    · Statement ${card.statementDay}
+
+                    · Due ${formatCardDate(due)}
+
+                </span>
+
+            </span>
+
+            <span class="leader"></span>
+
+            <span class="amt">
+
+                ${card.creditLimit > 0
+          ? fmt(card.creditLimit)
+          : "-"
+        }
+
+            </span>
+
+            <button
+                class="del"
+                data-card="${card.id}">
+                ✕
+            </button>
+
+        </div>
+
+        `;
+
+    }).join("");
+
+  container
+    .querySelectorAll("[data-card]")
+    .forEach(btn => {
+
+      btn.onclick = () => {
+        deleteCard(btn.dataset.card);
+        saveState();
+        renderEverything();
+      };
+    });
+
 }

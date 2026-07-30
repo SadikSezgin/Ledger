@@ -1,3 +1,5 @@
+import { CATEGORIES } from "../utils/constants.js";
+import { todayStr } from "../utils/helpers.js";
 
 export function populateCategorySelects() {
   const selectIds = [

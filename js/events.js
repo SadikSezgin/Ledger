@@ -1,141 +1,304 @@
-import { state, dash } from "./data.js";
+import { state, dash } from "./state/state.js";
 
-import { uid, todayStr } from "./utils.js";
+import { uid, todayStr } from "./utils/helpers.js";
 
-import { addCard } from "./cards.js";
+import { addCard } from "./ui/cards.js";
 
-import { saveState } from "./storage.js";
+import { saveState } from "./storage/localStorage.js";
+
+import { renderEverything } from "./render.js";
+
+import { renderDashboard } from "./ui/dashboard.js";
 
 import {
-    renderEverything,
-    renderDashboard,
     renderTrend,
     renderInvestments
-} from "./render.js";
+} from "./ui/charts.js";
+
+const $ = (id) => document.getElementById(id);
 
 export function refresh() {
     renderEverything();
     saveState();
 }
 
-// ---------- nav ----------
-document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById('page-' + btn.dataset.tab).classList.add('active');
-        if (btn.dataset.tab === 'dashboard') renderDashboard();
+// ----------------------------------------------------
+// Navigation
+// ----------------------------------------------------
+
+document.querySelectorAll(".tab-btn").forEach(btn => {
+
+    btn.addEventListener("click", () => {
+
+        document.querySelectorAll(".tab-btn")
+            .forEach(b => b.classList.remove("active"));
+
+        document.querySelectorAll(".page")
+            .forEach(p => p.classList.remove("active"));
+
+        btn.classList.add("active");
+
+        $("page-" + btn.dataset.tab)
+            .classList.add("active");
+
+        if (btn.dataset.tab === "dashboard") {
+            renderDashboard();
+        }
+
     });
+
 });
 
-// ---------- period controls ----------
-document.getElementById('period-seg').addEventListener('click', e => {
-    if (e.target.tagName !== 'BUTTON') return;
-    document.querySelectorAll('#period-seg button').forEach(b => b.classList.remove('active'));
-    e.target.classList.add('active');
+// ----------------------------------------------------
+// Dashboard Controls
+// ----------------------------------------------------
+
+$("period-seg").addEventListener("click", e => {
+
+    if (e.target.tagName !== "BUTTON") return;
+
+    document.querySelectorAll("#period-seg button")
+        .forEach(b => b.classList.remove("active"));
+
+    e.target.classList.add("active");
+
     dash.periodType = e.target.dataset.period;
     dash.offset = 0;
+
+    renderDashboard();
+
+});
+
+$("period-prev").addEventListener("click", () => {
+    dash.offset--;
     renderDashboard();
 });
 
-document.getElementById('period-prev').addEventListener('click', () => { dash.offset--; renderDashboard(); });
+$("period-next").addEventListener("click", () => {
+    dash.offset++;
+    renderDashboard();
+});
 
-document.getElementById('period-next').addEventListener('click', () => { dash.offset++; renderDashboard(); });
+$("trend-seg").addEventListener("click", e => {
 
-document.getElementById('trend-seg').addEventListener('click', e => {
-    if (e.target.tagName !== 'BUTTON') return;
-    document.querySelectorAll('#trend-seg button').forEach(b => b.classList.remove('active'));
-    e.target.classList.add('active');
+    if (e.target.tagName !== "BUTTON") return;
+
+    document.querySelectorAll("#trend-seg button")
+        .forEach(b => b.classList.remove("active"));
+
+    e.target.classList.add("active");
+
     dash.trend = e.target.dataset.trend;
+
     renderTrend();
+
 });
 
-document.getElementById('invest-seg').addEventListener('click', e => {
-    if (e.target.tagName !== 'BUTTON') return;
-    document.querySelectorAll('#invest-seg button').forEach(b => b.classList.remove('active'));
-    e.target.classList.add('active');
+$("invest-seg").addEventListener("click", e => {
+
+    if (e.target.tagName !== "BUTTON") return;
+
+    document.querySelectorAll("#invest-seg button")
+        .forEach(b => b.classList.remove("active"));
+
+    e.target.classList.add("active");
+
     dash.investTrend = e.target.dataset.trend;
+
     renderInvestments();
+
 });
 
-// ---------- add handlers ----------
-document.getElementById('inc-add').addEventListener('click', () => {
-    const name = document.getElementById('inc-name').value.trim();
-    const amount = Number(document.getElementById('inc-amount').value);
-    const date = document.getElementById('inc-date').value || todayStr();
-    const category = document.getElementById('inc-category').value;
-    const recurring = document.getElementById('inc-recurring').checked;
-    if (!name || !amount) { alert('Add a source name and amount.'); return; }
-    state.transactions.push({ id: uid(), kind: 'income', name, category, amount, date, recurring });
+// ----------------------------------------------------
+// Income
+// ----------------------------------------------------
+
+$("inc-add").addEventListener("click", () => {
+
+    const name = $("inc-name").value.trim();
+    const amount = Number($("inc-amount").value);
+    const date = $("inc-date").value || todayStr();
+    const category = $("inc-category").value;
+    const recurring = $("inc-recurring").checked;
+
+    if (!name || !amount) {
+        alert("Add a source name and amount.");
+        return;
+    }
+
+    state.transactions.push({
+        id: uid(),
+        kind: "income",
+        name,
+        category,
+        amount,
+        date,
+        recurring
+    });
+
     refresh();
-    document.getElementById('inc-name').value = ''; document.getElementById('inc-amount').value = '';
-    document.getElementById('inc-recurring').checked = false;
+
+    $("inc-name").value = "";
+    $("inc-amount").value = "";
+    $("inc-recurring").checked = false;
+
 });
 
-document.getElementById('pur-add').addEventListener('click', () => {
-    const name = document.getElementById('pur-name').value.trim();
-    const amount = Number(document.getElementById('pur-amount').value);
-    const date = document.getElementById('pur-date').value || todayStr();
-    const category = document.getElementById('pur-category').value;
-    const paymentMethod = document.getElementById('pur-payment').value;
-    const cardId = document.getElementById('pur-card').value;
-    if (!name || !amount) { alert('Add an item name and amount.'); return; }
-    state.transactions.push({ id: uid(), kind: 'purchase', name, category, amount, date, paymentMethod, cardId });
+// ----------------------------------------------------
+// Purchases
+// ----------------------------------------------------
+
+$("pur-add").addEventListener("click", () => {
+
+    const name = $("pur-name").value.trim();
+    const amount = Number($("pur-amount").value);
+    const date = $("pur-date").value || todayStr();
+    const category = $("pur-category").value;
+    const paymentMethod = $("pur-payment").value;
+    const cardId = $("pur-card").value;
+
+    if (!name || !amount) {
+        alert("Add an item name and amount.");
+        return;
+    }
+
+    state.transactions.push({
+        id: uid(),
+        kind: "purchase",
+        name,
+        category,
+        amount,
+        date,
+        paymentMethod,
+        cardId
+    });
+
     refresh();
-    document.getElementById('pur-name').value = ''; document.getElementById('pur-amount').value = '';
+
+    $("pur-name").value = "";
+    $("pur-amount").value = "";
+
 });
 
-document.getElementById('ins-add').addEventListener('click', () => {
-    const name = document.getElementById('ins-name').value.trim();
-    const totalAmount = Number(document.getElementById('ins-total').value);
-    const count = Math.max(1, Number(document.getElementById('ins-count').value) || 1);
-    const startDate = document.getElementById('ins-date').value || todayStr();
-    const category = document.getElementById('ins-category').value;
-    const cardId = document.getElementById('ins-card').value;
-    if (!name || !totalAmount) { alert('Add an item name and total amount.'); return; }
-    state.transactions.push({ id: uid(), kind: 'installment', name, category, totalAmount, count, startDate, cardId });
+// ----------------------------------------------------
+// Installments
+// ----------------------------------------------------
+
+$("ins-add").addEventListener("click", () => {
+
+    const name = $("ins-name").value.trim();
+    const totalAmount = Number($("ins-total").value);
+    const count = Math.max(1, Number($("ins-count").value) || 1);
+    const startDate = $("ins-date").value || todayStr();
+    const category = $("ins-category").value;
+    const cardId = $("ins-card").value;
+
+    if (!name || !totalAmount) {
+        alert("Add an item name and total amount.");
+        return;
+    }
+
+    state.transactions.push({
+        id: uid(),
+        kind: "installment",
+        name,
+        category,
+        totalAmount,
+        count,
+        startDate,
+        cardId
+    });
+
     refresh();
-    document.getElementById('ins-name').value = ''; document.getElementById('ins-total').value = ''; document.getElementById('ins-count').value = '1';
+
+    $("ins-name").value = "";
+    $("ins-total").value = "";
+    $("ins-count").value = "1";
+
 });
 
-document.getElementById('hh-add').addEventListener('click', () => {
-    const name = document.getElementById('hh-name').value.trim();
-    const amount = Number(document.getElementById('hh-amount').value);
-    const date = document.getElementById('hh-date').value || todayStr();
-    const category = document.getElementById('hh-category').value;
-    const recurring = document.getElementById('hh-recurring').checked;
-    if (!name || !amount) { alert('Add a name and amount.'); return; }
-    state.transactions.push({ id: uid(), kind: 'household', name, category, amount, date, recurring });
+// ----------------------------------------------------
+// Household
+// ----------------------------------------------------
+
+$("hh-add").addEventListener("click", () => {
+
+    const name = $("hh-name").value.trim();
+    const amount = Number($("hh-amount").value);
+    const date = $("hh-date").value || todayStr();
+    const category = $("hh-category").value;
+    const recurring = $("hh-recurring").checked;
+
+    if (!name || !amount) {
+        alert("Add a name and amount.");
+        return;
+    }
+
+    state.transactions.push({
+        id: uid(),
+        kind: "household",
+        name,
+        category,
+        amount,
+        date,
+        recurring
+    });
+
     refresh();
-    document.getElementById('hh-name').value = ''; document.getElementById('hh-amount').value = '';
+
+    $("hh-name").value = "";
+    $("hh-amount").value = "";
+
 });
 
-document.getElementById('inv-add').addEventListener('click', () => {
-    const name = document.getElementById('inv-name').value.trim();
-    const amount = Number(document.getElementById('inv-amount').value);
-    const date = document.getElementById('inv-date').value || todayStr();
-    const category = document.getElementById('inv-category').value;
-    const location = document.getElementById('inv-location').value;
-    const recurring = document.getElementById('inv-recurring').checked;
-    if (!name || !amount) { alert('Add a source name and amount.'); return; }
-    state.transactions.push({ id: uid(), kind: 'investment', name, category, location, amount, date, recurring });
+// ----------------------------------------------------
+// Investments
+// ----------------------------------------------------
+
+$("inv-add").addEventListener("click", () => {
+
+    const name = $("inv-name").value.trim();
+    const amount = Number($("inv-amount").value);
+    const date = $("inv-date").value || todayStr();
+    const category = $("inv-category").value;
+    const location = $("inv-location").value;
+    const recurring = $("inv-recurring").checked;
+
+    if (!name || !amount) {
+        alert("Add a source name and amount.");
+        return;
+    }
+
+    state.transactions.push({
+        id: uid(),
+        kind: "investment",
+        name,
+        category,
+        location,
+        amount,
+        date,
+        recurring
+    });
+
     refresh();
-    document.getElementById('inv-name').value = ''; document.getElementById('inv-amount').value = '';
-    document.getElementById('inv-recurring').checked = false;
+
+    $("inv-name").value = "";
+    $("inv-amount").value = "";
+    $("inv-recurring").checked = false;
+
 });
 
-document.getElementById("card-add").addEventListener("click", () => {
-    const name =
-        document.getElementById("card-name").value.trim();
-    const bank =
-        document.getElementById("card-bank").value.trim();
-    const statementDay =
-        Number(document.getElementById("card-statement").value);
-    const grace =
-        Number(document.getElementById("card-grace").value);
-    const limit =
-        Number(document.getElementById("card-limit").value);
+// ----------------------------------------------------
+// Cards
+// ----------------------------------------------------
+
+$("card-add").addEventListener("click", () => {
+
+    const name = $("card-name").value.trim();
+    const bank = $("card-bank").value.trim();
+    const statementDay = Number($("card-statement").value);
+    const graceDays = Number($("card-grace").value);
+    const creditLimit = Number($("card-limit").value);
 
     if (!name || !bank || !statementDay) {
         alert("Please complete all required fields.");
@@ -146,21 +309,25 @@ document.getElementById("card-add").addEventListener("click", () => {
         name,
         bank,
         statementDay,
-        graceDays: grace,
-        creditLimit: limit
+        graceDays,
+        creditLimit
     });
 
     refresh();
 
-    document.getElementById("card-name").value = "";
-    document.getElementById("card-bank").value = "";
-    document.getElementById("card-limit").value = "";
-    document.getElementById("card-statement").value = "";
-    document.getElementById("card-grace").value = "10";
+    $("card-name").value = "";
+    $("card-bank").value = "";
+    $("card-limit").value = "";
+    $("card-statement").value = "";
+    $("card-grace").value = "10";
 
 });
 
-document.getElementById("reset-btn").addEventListener("click", () => {
+// ----------------------------------------------------
+// Reset
+// ----------------------------------------------------
+
+$("reset-btn").addEventListener("click", () => {
 
     if (!confirm("This will permanently delete all your entries and budgets. Continue?")) {
         return;
@@ -174,12 +341,17 @@ document.getElementById("reset-btn").addEventListener("click", () => {
 
 });
 
-document.addEventListener("change", function (e) {
-    if (e.target.id === "pur-payment") {
+// ----------------------------------------------------
+// Misc
+// ----------------------------------------------------
 
-        document.getElementById("pur-card-field").style.display =
-            e.target.value === "card"
-                ? ""
-                : "none";
-    }
+document.addEventListener("change", e => {
+
+    if (e.target.id !== "pur-payment") return;
+
+    $("pur-card-field").style.display =
+        e.target.value === "card"
+            ? ""
+            : "none";
+
 });
