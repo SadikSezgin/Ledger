@@ -4,6 +4,7 @@ import { renderInstallments } from "./ui/installments.js";
 import { renderBudgetsPage } from "./ui/budgets.js";
 import { renderList } from "./ui/transactions.js";
 import { populateCardSelects } from "./ui/cards.js";
+import { saveState } from "./storage/localStorage.js";
 
 // ---------- master render ----------
 export function renderEverything() {
@@ -18,4 +19,7 @@ export function renderEverything() {
   populateCardSelects();
 }
 
-
+export function refresh() {
+    renderEverything();
+    saveState();
+}

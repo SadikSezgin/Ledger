@@ -394,9 +394,11 @@ footer.foot button{
     justify-content:center;
     align-items:center;
     gap:80px;
-    background:#f5f3ef;
-}
 
+    padding:40px;
+
+    background:var(--paper);
+}
 .auth-left{
     max-width:420px;
 }
@@ -404,19 +406,73 @@ footer.foot button{
 .auth-card{
     width:380px;
     padding:40px;
-    border-radius:18px;
-    background:white;
-    box-shadow:0 15px 40px rgba(0,0,0,.08);
+
+    background:var(--paper-card);
+
+    border:1px solid var(--line-soft);
+    border-radius:14px;
+
+    box-shadow:
+        0 1px 0 var(--line-soft) inset,
+        0 8px 30px rgba(31,59,44,.06);
+
+    color:var(--ink);
+}
+
+.auth-card h2{
+    margin:0 0 28px;
+
+    font-family:'Fraunces',serif;
+    font-size:28px;
+    font-weight:600;
+
+    color:var(--forest);
 }
 
 .auth-card input{
     width:100%;
+
     margin-bottom:16px;
+    padding:10px 12px;
+
+    background:var(--paper-card);
+
+    border:1px solid var(--line);
+    border-radius:7px;
+
+    color:var(--ink);
+
+    font-family:'IBM Plex Sans',sans-serif;
+    font-size:14px;
 }
 
-.auth-card button{
-    width:100%;
+.auth-card input:focus{
+    outline:2px solid var(--brass-light);
+    outline-offset:1px;
 }
+
+.auth-card button:not(.link-btn){
+
+    width:100%;
+    height:48px;
+
+    border:none;
+    border-radius:8px;
+
+    background:var(--forest);
+    color:var(--paper-card);
+
+    font-size:14px;
+    font-weight:600;
+
+    transition:.2s ease;
+}
+
+.auth-card button:not(.link-btn):hover{
+    background:var(--forest-light);
+}
+
+
 
 #loading-screen {
     position: fixed;
@@ -427,8 +483,8 @@ footer.foot button{
     justify-content: center;
     align-items: center;
 
-    background: var(--background);
-    color: var(--text);
+    background:var(--paper);
+    color:var(--forest);
 
     z-index: 9999;
 }
@@ -438,8 +494,8 @@ footer.foot button{
     font-size: 2rem;
 }
 
-#loading-screen p {
-    color: var(--muted);
+#loading-screen p{
+    color:var(--ink-soft);
 }
 
 #notification-container {
@@ -471,4 +527,41 @@ footer.foot button{
 .notification.show {
     opacity: 1;
     transform: translateX(0);
+}
+
+.link-btn{
+
+    color:var(--brass);
+
+    font-weight:600;
+
+    transition:.2s ease;
+}
+
+.link-btn:hover{
+
+    color:var(--forest);
+
+    text-decoration:none;
+
+}
+
+#logout-btn{
+
+    background:transparent;
+
+    border:1px solid var(--line);
+
+    color:var(--ink);
+
+}
+
+#logout-btn:hover{
+
+    background:var(--paper-dark);
+
+    border-color:var(--brass);
+
+    color:var(--forest);
+
 }
