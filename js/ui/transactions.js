@@ -1,6 +1,8 @@
 import { state } from "../state/state.js";
 import { CATEGORY_COLORS} from "../utils/constants.js";
 import { fmt } from "../utils/helpers.js";
+import { saveState } from "../storage/localStorage.js";
+import { renderEverything } from "../render.js";
 
 export function ledgerRow(t) {
   const isInvestment = t.kind === 'investment';

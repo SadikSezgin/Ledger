@@ -1,5 +1,6 @@
 export const state = { 
     user: null,
+    
     transactions: [], 
     budgets: {}, 
     cards: [] 
