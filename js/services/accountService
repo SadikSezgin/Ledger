@@ -1,0 +1,114 @@
+// js/services/accountService.js
+
+import { db } from "../firebase.js";
+import { getCurrentWorkspaceId } from "./firestoreService.js";
+
+import {
+    collection,
+    addDoc,
+    getDocs,
+    updateDoc,
+    deleteDoc,
+    doc,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+/**
+ * Create a new account
+ */
+export async function createAccount(account) {
+
+    const workspaceId = getCurrentWorkspaceId();
+
+    const accountsRef = collection(
+        db,
+        "workspaces",
+        workspaceId,
+        "accounts"
+    );
+
+    const accountData = {
+        name: account.name,
+        type: account.type,
+        currency: account.currency || "TRY",
+
+        statementDay: account.statementDay ?? null,
+        dueOffset: account.dueOffset ?? null,
+        limit: account.limit ?? null,
+
+        isActive: true,
+
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+    };
+
+    const docRef = await addDoc(accountsRef, accountData);
+
+    return {
+        id: docRef.id,
+        ...accountData
+    };
+}
+
+/**
+ * Get all accounts
+ */
+export async function getAccounts() {
+
+    const workspaceId = getCurrentWorkspaceId();
+
+    const snapshot = await getDocs(
+        collection(
+            db,
+            "workspaces",
+            workspaceId,
+            "accounts"
+        )
+    );
+
+    return snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+    }));
+}
+
+/**
+ * Update an account
+ */
+export async function updateAccount(accountId, updates) {
+
+    const workspaceId = getCurrentWorkspaceId();
+
+    const accountRef = doc(
+        db,
+        "workspaces",
+        workspaceId,
+        "accounts",
+        accountId
+    );
+
+    await updateDoc(accountRef, {
+        ...updates,
+        updatedAt: serverTimestamp()
+    });
+
+}
+
+/**
+ * Delete an account
+ */
+export async function deleteAccount(accountId) {
+
+    const workspaceId = getCurrentWorkspaceId();
+
+    const accountRef = doc(
+        db,
+        "workspaces",
+        workspaceId,
+        "accounts",
+        accountId
+    );
+
+    await deleteDoc(accountRef);
+
+}

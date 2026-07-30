@@ -4,7 +4,8 @@ import {
     collection,
     doc,
     setDoc,
-    serverTimestamp
+    serverTimestamp,
+    getDoc
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 export async function createWorkspace(user) {
@@ -22,4 +23,15 @@ export async function createWorkspace(user) {
 
     return workspace;
 
+}
+
+export async function getWorkspace(workspaceId) {
+
+    const snapshot = await getDoc(doc(db, "workspaces", workspaceId));
+
+    if (!snapshot.exists()) {
+        throw new Error("Workspace not found.");
+    }
+
+    return snapshot.data();
 }

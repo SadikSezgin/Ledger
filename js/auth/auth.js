@@ -1,4 +1,5 @@
 import { auth } from "../firebase.js";
+import { clearSession } from "../state/session.js";
 
 import {
     signInWithEmailAndPassword,
@@ -16,6 +17,7 @@ import {
 import {
     createWorkspace
 } from "../services/workspaceService.js";
+
 
 export async function login(email, password) {
 
@@ -73,5 +75,9 @@ export async function resetPassword(email) {
 }
 
 export async function logout() {
-    return await signOut(auth);
+
+    await signOut(auth);
+
+    clearSession();
+
 }

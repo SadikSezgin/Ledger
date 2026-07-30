@@ -1,6 +1,7 @@
 import { db } from "../firebase.js";
 import {
     doc,
+    getDoc,
     setDoc,
     updateDoc,
     serverTimestamp
@@ -40,4 +41,15 @@ export async function updateLastLogin(uid) {
 
     });
 
+}
+
+export async function getUserProfile(uid) {
+
+    const snapshot = await getDoc(doc(db, "users", uid));
+
+    if (!snapshot.exists()) {
+        throw new Error("User profile not found.");
+    }
+
+    return snapshot.data();
 }
