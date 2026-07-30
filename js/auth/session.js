@@ -2,6 +2,8 @@ import { auth } from "../firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 import { loadState } from "../storage/localStorage.js";
 import { renderEverything } from "../render.js";
+import { session } from "../state/session.js";
+import { getUserProfile } from "../services/userService.js";
 
 export function currentUser() {
 
@@ -19,16 +21,30 @@ export function initializeSession() {
     authScreen.style.display = "none";
     appScreen.style.display = "none";
 
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
 
         loadingScreen.style.display = "none";
 
         if (user) {
-                loadState();
-                showDashboard();
-                renderEverything();
+
+            const profile = await getUserProfile(user.uid);
+
+            setSession(
+                user.uid,
+                profile.defaultWorkspaceId
+            );
+
+            loadState();
+
+            showDashboard();
+
+            renderEverything();
+
         } else {
+
+            clearSession();
             showLogin();
+
         }
 
     });
