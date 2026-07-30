@@ -80,7 +80,7 @@ document.querySelector("#notification-container")
         });
 
         // Redirect after successful registration
-        window.location.href = new URL("../../", import.meta.url).pathname;
+        window.location.href = "/Ledger/";
 
     } catch (error) {
 
