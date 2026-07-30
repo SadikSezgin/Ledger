@@ -441,3 +441,34 @@ footer.foot button{
 #loading-screen p {
     color: var(--muted);
 }
+
+#notification-container {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    width: 360px;
+    max-width: calc(100vw - 32px);
+
+    z-index: 10000;
+    pointer-events: none;
+}
+
+#notification-container .notification {
+    pointer-events: auto;
+}
+
+.notification {
+    opacity: 0;
+    transform: translateX(24px);
+    transition: opacity .25s ease, transform .25s ease;
+}
+
+.notification.show {
+    opacity: 1;
+    transform: translateX(0);
+}
