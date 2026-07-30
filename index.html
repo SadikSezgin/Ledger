@@ -12,357 +12,540 @@
 
 <body>
 
-  <div class="app">
-    <nav class="nav">
-      <div class="brand"><span class="mark">₺</span> Ledger</div>
-      <button class="tab-btn active" data-tab="dashboard"><span class="num">00</span> Dashboard</button>
-      <button class="tab-btn" data-tab="income"><span class="num">01</span> Income</button>
-      <button class="tab-btn" data-tab="purchases"><span class="num">02</span> Purchases</button>
-      <button class="tab-btn" data-tab="installments"><span class="num">03</span> Installments</button>
-      <button class="tab-btn" data-tab="household"><span class="num">04</span> Household</button>
-      <button class="tab-btn" data-tab="investments"><span class="num">05</span> Investments</button>
-      <button class="tab-btn" data-tab="budgets"><span class="num">06</span> Budgets</button>
-      <button class="tab-btn" data-tab="cards"><span class="num">07</span> Cards</button>
-    </nav>
+    <!-- Loading -->
+    <div id="loading-screen">
+        <h1>Ledger</h1>
+        <p>Loading...</p>
+    </div>
 
-    <main class="main">
+    <!-- Authentication -->
+    <div id="auth-screen">
 
-      <!-- DASHBOARD -->
-      <section class="page active" id="page-dashboard">
-        <h1 class="page-title">Dashboard</h1>
-        <p class="page-sub">Where the money came from, and where it went.</p>
+      <!-- LOGIN -->
+        <section id="login-page" class="auth-page">
 
-        <div class="grid cols-3" style="margin-bottom:22px;">
-          <div class="stat-card">
-            <div class="label">Income — this period</div>
-            <div class="amount" id="stat-income">₺0</div>
-          </div>
-          <div class="stat-card rust">
-            <div class="label">Expenses — this period</div>
-            <div class="amount" id="stat-expense">₺0</div>
-          </div>
-          <div class="stat-card brass">
-            <div class="label">Net</div>
-            <div class="amount" id="stat-net">₺0</div>
-          </div>
-        </div>
+            <div class="auth-left">
+                <div class="logo">
+                    <span class="mark">₺</span>
+                    Ledger
+                </div>
 
-        <div class="period-bar">
-          <div class="seg" id="period-seg">
-            <button data-period="week">Week</button>
-            <button data-period="month" class="active">Month</button>
-            <button data-period="year">Year</button>
-          </div>
-          <div class="stepper">
-            <button id="period-prev">←</button>
-            <span class="period-label" id="period-label"></span>
-            <button id="period-next">→</button>
-          </div>
-        </div>
+                <h1>Personal Finance</h1>
 
-        <div class="two-col" style="margin-bottom:24px;">
-          <div class="card">
-            <h3>Spending by category</h3>
-            <div class="chart-wrap"><canvas id="pie-chart"></canvas></div>
-          </div>
-          <div class="card">
-            <h3>Breakdown</h3>
-            <div id="pie-legend"></div>
-          </div>
-        </div>
-
-        <div class="card" style="margin-bottom:24px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <h3 style="margin:0;">Trend</h3>
-            <div class="seg" id="trend-seg">
-              <button data-trend="weekly">Weekly</button>
-              <button data-trend="monthly" class="active">Monthly</button>
+                <p>
+                    Manage income, expenses, investments and credit cards in one place.
+                </p>
             </div>
-          </div>
-          <div class="chart-wrap tall"><canvas id="line-chart"></canvas></div>
-        </div>
 
-        <div class="card" style="margin-bottom:24px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <h3 style="margin:0;">Investments</h3>
-            <div class="seg" id="invest-seg">
-              <button data-trend="weekly">Weekly</button>
-              <button data-trend="monthly" class="active">Monthly</button>
-              <button data-trend="yearly">Yearly</button>
-            </div>
-          </div>
-          <div class="chart-wrap tall"><canvas id="bar-chart"></canvas></div>
-        </div>
+            <div class="auth-card">
 
-        <div class="card">
-          <h3>Budgets this month</h3>
-          <div id="dash-budgets"></div>
-        </div>
-      </section>
+                <h2>Sign In</h2>
 
-      <!-- INCOME -->
-      <section class="page" id="page-income">
-        <h1 class="page-title">Income</h1>
-        <p class="page-sub">Everything coming in.</p>
-        <div class="two-col">
-          <div class="card">
-            <h3>Add income</h3>
-            <div class="form-grid">
-              <div class="field span2"><label>Source</label><input id="inc-name" placeholder="e.g. Salary"></div>
-              <div class="field"><label>Category</label>
-                <select id="inc-category">
-                  <option>Salary</option>
-                  <option>Freelance</option>
-                  <option>Investment Income</option>
-                  <option>Gift</option>
-                  <option>Other</option>
-                </select>
-              </div>
-              <div class="field"><label>Amount (₺)</label><input id="inc-amount" type="number" min="0" placeholder="0">
-              </div>
-              <div class="field"><label>Date</label><input id="inc-date" type="date"></div>
-              <div class="field" style="justify-content:flex-end;">
-                <label class="checkfield"><input type="checkbox" id="inc-recurring"> Repeats every month</label>
-              </div>
-            </div>
-            <button class="btn" id="inc-add">Add income</button>
-          </div>
-          <div class="card">
-            <h3>All income entries</h3>
-            <div id="inc-list"></div>
-          </div>
-        </div>
-      </section>
+                <input
+                    id="login-email"
+                    type="email"
+                    placeholder="Email"
+                >
 
-      <!-- PURCHASES -->
-      <section class="page" id="page-purchases">
-        <h1 class="page-title">One-time purchases</h1>
-        <p class="page-sub">Single, non-recurring spends.</p>
-        <div class="two-col">
-          <div class="card">
-            <h3>Add purchase</h3>
-            <div class="form-grid">
-              <div class="field span2">
-                <label>Item</label>
-                <input id="pur-name" placeholder="e.g. New shoes">
-              </div>
+                <input
+                    id="login-password"
+                    type="password"
+                    placeholder="Password"
+                >
 
-              <div class="field">
-                <label>Category</label>
-                <select id="pur-category"></select>
-              </div>
+                <button id="login-btn">
+                    Login
+                </button>
 
-              <div class="field">
-                <label>Amount (₺)</label>
-                <input id="pur-amount" type="number" min="0">
-              </div>
+                <button
+                    id="go-register"
+                    class="link-btn"
+                >
+                    Create account
+                </button>
 
-              <div class="field">
-                <label>Payment Method</label>
-                <select id="pur-payment">
-                  <option value="cash">Cash / Debit</option>
-                  <option value="card">Credit Card</option>
-                </select>
-              </div>
-
-              <div class="field" id="pur-card-field" style="display:none;">
-                <label>Card</label>
-                <select id="pur-card"></select>
-              </div>
-
-              <div class="field">
-                <label>Date</label>
-                <input id="pur-date" type="date">
-              </div>
+                <button
+                    id="go-reset"
+                    class="link-btn"
+                >
+                    Forgot password?
+                </button>
 
             </div>
-            <button class="btn" id="pur-add">Add purchase</button>
+
+        </section>
+
+      <!-- REGISTER -->
+      <section
+          id="register-page"
+          class="auth-page"
+          style="display:none;"
+      >
+
+          <div class="auth-card">
+
+              <h2>Create Account</h2>
+
+              <input
+                  id="register-email"
+                  type="email"
+                  placeholder="Email"
+              >
+
+              <input
+                  id="register-password"
+                  type="password"
+                  placeholder="Password"
+              >
+
+              <input
+                  id="register-confirm-password"
+                  type="password"
+                  placeholder="Confirm Password"
+              >
+
+              <button id="register-btn">
+                  Register
+              </button>
+
+              <button
+                  id="back-login-from-register"
+                  class="link-btn"
+              >
+                  Back to Login
+              </button>
+
           </div>
-          <div class="card">
-            <h3>All purchases</h3>
-            <div id="pur-list"></div>
-          </div>
-        </div>
+
       </section>
 
-      <!-- INSTALLMENTS -->
-      <section class="page" id="page-installments">
-        <h1 class="page-title">Credit card installments</h1>
-        <p class="page-sub">Split payments, spread automatically across their months.</p>
-        <div class="two-col">
-          <div class="card">
-            <h3>Add installment purchase</h3>
-            <div class="form-grid">
-              <div class="field span2">
-                <label>Item</label>
-                <input id="ins-name" placeholder="e.g. Laptop">
-              </div>
-              <div class="field">
-                <label>Category</label>
-                <select id="ins-category"></select>
-              </div>
-              <div class="field">
-                <label>Total amount (₺)</label>
-                <input id="ins-total" type="number" min="0">
-              </div>
-              <div class="field">
-                <label># of installments</label>
-                <input id="ins-count" type="number" min="1" value="1">
-              </div>
-              <div class="field">
-                <label>First payment date</label>
-                <input id="ins-date" type="date">
-              </div>
-              <div class="field">
-                <label>Card</label>
-                <select id="ins-card"></select>
+      <!-- FORGOT PASSWORD -->
+      <section
+          id="reset-password-page"
+          class="auth-page"
+          style="display:none;"
+      >
+
+          <div class="auth-card">
+
+              <h2>Forgot Password</h2>
+
+              <input
+                  id="reset-email"
+                  type="email"
+                  placeholder="Email"
+              >
+
+              <button id="reset-password-btn">
+                  Send Reset Link
+              </button>
+
+              <button
+                  id="back-login-from-reset"
+                  class="link-btn"
+              >
+                  Back to Login
+              </button>
+
+          </div>
+
+      </section>
+
+      <!-- VERIFY EMAIL -->
+      <section
+          id="verify-email-page"
+          class="auth-page"
+          style="display:none;"
+      >
+
+          <div class="auth-card">
+
+              <h2>Verify Your Email</h2>
+
+              <p>
+                  We've sent a verification email.
+                  Please verify your account before continuing.
+              </p>
+
+          </div>
+
+      </section>
+
+      <!-- ONBOARDING -->
+      <section
+          id="onboarding-page"
+          class="auth-page"
+          style="display:none;"
+      >
+
+          <div class="auth-card">
+
+              <h2>Welcome to Ledger</h2>
+
+              <p>
+                  Let's finish setting up your workspace.
+              </p>
+
+          </div>
+
+      </section>
+
+    </div>
+
+    <!-- Dashboard -->
+    <div id="app-screen">
+      <nav class="nav">
+        <div class="brand"><span class="mark">₺</span> Ledger</div>
+        <button class="tab-btn active" data-tab="dashboard"><span class="num">00</span> Dashboard</button>
+        <button class="tab-btn" data-tab="income"><span class="num">01</span> Income</button>
+        <button class="tab-btn" data-tab="purchases"><span class="num">02</span> Purchases</button>
+        <button class="tab-btn" data-tab="installments"><span class="num">03</span> Installments</button>
+        <button class="tab-btn" data-tab="household"><span class="num">04</span> Household</button>
+        <button class="tab-btn" data-tab="investments"><span class="num">05</span> Investments</button>
+        <button class="tab-btn" data-tab="budgets"><span class="num">06</span> Budgets</button>
+        <button class="tab-btn" data-tab="cards"><span class="num">07</span> Cards</button>
+        <button id="logout-btn">Logout</button>
+      </nav>
+      <main class="main">
+
+        <!-- DASHBOARD -->
+        <section class="page active" id="page-dashboard">
+          <h1 class="page-title">Dashboard</h1>
+          <p class="page-sub">Where the money came from, and where it went.</p>
+
+          <div class="grid cols-3" style="margin-bottom:22px;">
+            <div class="stat-card">
+              <div class="label">Income — this period</div>
+              <div class="amount" id="stat-income">₺0</div>
+            </div>
+            <div class="stat-card rust">
+              <div class="label">Expenses — this period</div>
+              <div class="amount" id="stat-expense">₺0</div>
+            </div>
+            <div class="stat-card brass">
+              <div class="label">Net</div>
+              <div class="amount" id="stat-net">₺0</div>
+            </div>
+          </div>
+
+          <div class="period-bar">
+            <div class="seg" id="period-seg">
+              <button data-period="week">Week</button>
+              <button data-period="month" class="active">Month</button>
+              <button data-period="year">Year</button>
+            </div>
+            <div class="stepper">
+              <button id="period-prev">←</button>
+              <span class="period-label" id="period-label"></span>
+              <button id="period-next">→</button>
+            </div>
+          </div>
+
+          <div class="two-col" style="margin-bottom:24px;">
+            <div class="card">
+              <h3>Spending by category</h3>
+              <div class="chart-wrap"><canvas id="pie-chart"></canvas></div>
+            </div>
+            <div class="card">
+              <h3>Breakdown</h3>
+              <div id="pie-legend"></div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <h3 style="margin:0;">Trend</h3>
+              <div class="seg" id="trend-seg">
+                <button data-trend="weekly">Weekly</button>
+                <button data-trend="monthly" class="active">Monthly</button>
               </div>
             </div>
-            <button class="btn" id="ins-add">Add installment plan</button>
+            <div class="chart-wrap tall"><canvas id="line-chart"></canvas></div>
           </div>
-          <div class="card">
-            <h3>Active plans</h3>
-            <div id="ins-list"></div>
-          </div>
-        </div>
-      </section>
 
-      <!-- HOUSEHOLD -->
-      <section class="page" id="page-household">
-        <h1 class="page-title">Household expenses</h1>
-        <p class="page-sub">Rent, bills, and the recurring cost of living.</p>
-        <div class="two-col">
-          <div class="card">
-            <h3>Add household expense</h3>
-            <div class="form-grid">
-              <div class="field span2"><label>Name</label><input id="hh-name" placeholder="e.g. Rent"></div>
-              <div class="field"><label>Category</label><select id="hh-category"></select></div>
-              <div class="field"><label>Amount (₺)</label><input id="hh-amount" type="number" min="0" placeholder="0">
-              </div>
-              <div class="field"><label>Date</label><input id="hh-date" type="date"></div>
-              <div class="field" style="justify-content:flex-end;">
-                <label class="checkfield"><input type="checkbox" id="hh-recurring" checked> Repeats every month</label>
+          <div class="card" style="margin-bottom:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <h3 style="margin:0;">Investments</h3>
+              <div class="seg" id="invest-seg">
+                <button data-trend="weekly">Weekly</button>
+                <button data-trend="monthly" class="active">Monthly</button>
+                <button data-trend="yearly">Yearly</button>
               </div>
             </div>
-            <button class="btn" id="hh-add">Add expense</button>
+            <div class="chart-wrap tall"><canvas id="bar-chart"></canvas></div>
           </div>
-          <div class="card">
-            <h3>All household expenses</h3>
-            <div id="hh-list"></div>
-          </div>
-        </div>
-      </section>
 
-      <!-- INVESTMENTS -->
-      <section class="page" id="page-investments">
-        <h1 class="page-title">Investments</h1>
-        <p class="page-sub">Investments</p>
-        <div class="two-col">
           <div class="card">
-            <h3>Add Investment</h3>
-            <div class="form-grid">
-              <div class="field span2"><label>Asset Class</label><input id="inv-name" placeholder="e.g. Stock Market">
+            <h3>Budgets this month</h3>
+            <div id="dash-budgets"></div>
+          </div>
+        </section>
+
+        <!-- INCOME -->
+        <section class="page" id="page-income">
+          <h1 class="page-title">Income</h1>
+          <p class="page-sub">Everything coming in.</p>
+          <div class="two-col">
+            <div class="card">
+              <h3>Add income</h3>
+              <div class="form-grid">
+                <div class="field span2"><label>Source</label><input id="inc-name" placeholder="e.g. Salary"></div>
+                <div class="field"><label>Category</label>
+                  <select id="inc-category">
+                    <option>Salary</option>
+                    <option>Freelance</option>
+                    <option>Investment Income</option>
+                    <option>Gift</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <div class="field"><label>Amount (₺)</label><input id="inc-amount" type="number" min="0" placeholder="0">
+                </div>
+                <div class="field"><label>Date</label><input id="inc-date" type="date"></div>
+                <div class="field" style="justify-content:flex-end;">
+                  <label class="checkfield"><input type="checkbox" id="inc-recurring"> Repeats every month</label>
+                </div>
               </div>
-              <div class="field"><label>Category</label>
-                <select id="inv-category">
-                  <option>Stock Market</option>
-                  <option>Crypto</option>
-                  <option>Gold</option>
-                  <option>Other</option>
-                </select>
-              </div>
-              <div class="field"><label>Asset Location</label>
-                <select id="inv-location">
-                  <option>Garanti App</option>
-                  <option>Binance</option>
-                  <option>Midas</option>
-                  <option>Physical</option>
-                  <option>Other</option>
-                </select>
-              </div>
-              <div class="field"><label>Amount (₺)</label><input id="inv-amount" type="number" min="0" placeholder="0">
-              </div>
-              <div class="field"><label>Date</label><input id="inv-date" type="date"></div>
-              <div class="field" style="justify-content:flex-end;">
-                <label class="checkfield"><input type="checkbox" id="inv-recurring"> Repeats every month</label>
-              </div>
+              <button class="btn" id="inc-add">Add income</button>
             </div>
-            <button class="btn" id="inv-add">Add Investment</button>
-          </div>
-          <div class="card">
-            <h3>All Investment Entries</h3>
-            <div id="inv-list"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- BUDGETS -->
-      <section class="page" id="page-budgets">
-        <h1 class="page-title">Monthly budgets</h1>
-        <p class="page-sub">Set a monthly ceiling per category, tracked against this month's actual spend.</p>
-        <div class="two-col">
-          <div class="card">
-            <h3>Set budgets</h3>
-            <div id="budget-form"></div>
-          </div>
-          <div class="card">
-            <h3>This month's progress</h3>
-            <div id="budget-progress"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- CARDS -->
-      <section class="page" id="page-cards">
-        <h1 class="page-title">My Cards</h1>
-        <p class="page-sub">
-          Manage your credit cards and statement dates.
-        </p>
-        <div class="two-col">
-          <div class="card">
-            <h3>Add Card</h3>
-            <div class="form-grid">
-              <div class="field span2">
-                <label>Card Name</label>
-                <input id="card-name" placeholder="e.g. Garanti Bonus">
-              </div>
-              <div class="field span2">
-                <label>Bank</label>
-                <input id="card-bank" placeholder="e.g. Garanti BBVA">
-              </div>
-              <div class="field">
-                <label>Credit Limit (₺)</label>
-                <input id="card-limit" type="number">
-              </div>
-              <div class="field">
-                <label>Statement Closing Day</label>
-                <input id="card-statement" type="number" min="1" max="31">
-              </div>
-              <div class="field span2">
-                <label>Payment Grace Period (days)</label>
-                <input id="card-grace" type="number" value="10">
-              </div>
+            <div class="card">
+              <h3>All income entries</h3>
+              <div id="inc-list"></div>
             </div>
-            <button class="btn" id="card-add">
-              Add Card
-            </button>
           </div>
-          <div class="card">
-            <h3>My Cards</h3>
-            <div id="card-list"></div>
+        </section>
+
+        <!-- PURCHASES -->
+        <section class="page" id="page-purchases">
+          <h1 class="page-title">One-time purchases</h1>
+          <p class="page-sub">Single, non-recurring spends.</p>
+          <div class="two-col">
+            <div class="card">
+              <h3>Add purchase</h3>
+              <div class="form-grid">
+                <div class="field span2">
+                  <label>Item</label>
+                  <input id="pur-name" placeholder="e.g. New shoes">
+                </div>
+
+                <div class="field">
+                  <label>Category</label>
+                  <select id="pur-category"></select>
+                </div>
+
+                <div class="field">
+                  <label>Amount (₺)</label>
+                  <input id="pur-amount" type="number" min="0">
+                </div>
+
+                <div class="field">
+                  <label>Payment Method</label>
+                  <select id="pur-payment">
+                    <option value="cash">Cash / Debit</option>
+                    <option value="card">Credit Card</option>
+                  </select>
+                </div>
+
+                <div class="field" id="pur-card-field" style="display:none;">
+                  <label>Card</label>
+                  <select id="pur-card"></select>
+                </div>
+
+                <div class="field">
+                  <label>Date</label>
+                  <input id="pur-date" type="date">
+                </div>
+
+              </div>
+              <button class="btn" id="pur-add">Add purchase</button>
+            </div>
+            <div class="card">
+              <h3>All purchases</h3>
+              <div id="pur-list"></div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-    </main>
-  </div>
+        <!-- INSTALLMENTS -->
+        <section class="page" id="page-installments">
+          <h1 class="page-title">Credit card installments</h1>
+          <p class="page-sub">Split payments, spread automatically across their months.</p>
+          <div class="two-col">
+            <div class="card">
+              <h3>Add installment purchase</h3>
+              <div class="form-grid">
+                <div class="field span2">
+                  <label>Item</label>
+                  <input id="ins-name" placeholder="e.g. Laptop">
+                </div>
+                <div class="field">
+                  <label>Category</label>
+                  <select id="ins-category"></select>
+                </div>
+                <div class="field">
+                  <label>Total amount (₺)</label>
+                  <input id="ins-total" type="number" min="0">
+                </div>
+                <div class="field">
+                  <label># of installments</label>
+                  <input id="ins-count" type="number" min="1" value="1">
+                </div>
+                <div class="field">
+                  <label>First payment date</label>
+                  <input id="ins-date" type="date">
+                </div>
+                <div class="field">
+                  <label>Card</label>
+                  <select id="ins-card"></select>
+                </div>
+              </div>
+              <button class="btn" id="ins-add">Add installment plan</button>
+            </div>
+            <div class="card">
+              <h3>Active plans</h3>
+              <div id="ins-list"></div>
+            </div>
+          </div>
+        </section>
 
-  <footer class="foot">
-    Your data is stored privately in your browser on this device. <button id="reset-btn">Clear all data</button>
-  </footer>
-  <div id="save-toast"></div>
+        <!-- HOUSEHOLD -->
+        <section class="page" id="page-household">
+          <h1 class="page-title">Household expenses</h1>
+          <p class="page-sub">Rent, bills, and the recurring cost of living.</p>
+          <div class="two-col">
+            <div class="card">
+              <h3>Add household expense</h3>
+              <div class="form-grid">
+                <div class="field span2"><label>Name</label><input id="hh-name" placeholder="e.g. Rent"></div>
+                <div class="field"><label>Category</label><select id="hh-category"></select></div>
+                <div class="field"><label>Amount (₺)</label><input id="hh-amount" type="number" min="0" placeholder="0">
+                </div>
+                <div class="field"><label>Date</label><input id="hh-date" type="date"></div>
+                <div class="field" style="justify-content:flex-end;">
+                  <label class="checkfield"><input type="checkbox" id="hh-recurring" checked> Repeats every month</label>
+                </div>
+              </div>
+              <button class="btn" id="hh-add">Add expense</button>
+            </div>
+            <div class="card">
+              <h3>All household expenses</h3>
+              <div id="hh-list"></div>
+            </div>
+          </div>
+        </section>
 
+        <!-- INVESTMENTS -->
+        <section class="page" id="page-investments">
+          <h1 class="page-title">Investments</h1>
+          <p class="page-sub">Investments</p>
+          <div class="two-col">
+            <div class="card">
+              <h3>Add Investment</h3>
+              <div class="form-grid">
+                <div class="field span2"><label>Asset Class</label><input id="inv-name" placeholder="e.g. Stock Market">
+                </div>
+                <div class="field"><label>Category</label>
+                  <select id="inv-category">
+                    <option>Stock Market</option>
+                    <option>Crypto</option>
+                    <option>Gold</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <div class="field"><label>Asset Location</label>
+                  <select id="inv-location">
+                    <option>Garanti App</option>
+                    <option>Binance</option>
+                    <option>Midas</option>
+                    <option>Physical</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <div class="field"><label>Amount (₺)</label><input id="inv-amount" type="number" min="0" placeholder="0">
+                </div>
+                <div class="field"><label>Date</label><input id="inv-date" type="date"></div>
+                <div class="field" style="justify-content:flex-end;">
+                  <label class="checkfield"><input type="checkbox" id="inv-recurring"> Repeats every month</label>
+                </div>
+              </div>
+              <button class="btn" id="inv-add">Add Investment</button>
+            </div>
+            <div class="card">
+              <h3>All Investment Entries</h3>
+              <div id="inv-list"></div>
+            </div>
+          </div>
+        </section>
 
-</body>
+        <!-- BUDGETS -->
+        <section class="page" id="page-budgets">
+          <h1 class="page-title">Monthly budgets</h1>
+          <p class="page-sub">Set a monthly ceiling per category, tracked against this month's actual spend.</p>
+          <div class="two-col">
+            <div class="card">
+              <h3>Set budgets</h3>
+              <div id="budget-form"></div>
+            </div>
+            <div class="card">
+              <h3>This month's progress</h3>
+              <div id="budget-progress"></div>
+            </div>
+          </div>
+        </section>
 
-</html>
+        <!-- CARDS -->
+        <section class="page" id="page-cards">
+          <h1 class="page-title">My Cards</h1>
+          <p class="page-sub">
+            Manage your credit cards and statement dates.
+          </p>
+          <div class="two-col">
+            <div class="card">
+              <h3>Add Card</h3>
+              <div class="form-grid">
+                <div class="field span2">
+                  <label>Card Name</label>
+                  <input id="card-name" placeholder="e.g. Garanti Bonus">
+                </div>
+                <div class="field span2">
+                  <label>Bank</label>
+                  <input id="card-bank" placeholder="e.g. Garanti BBVA">
+                </div>
+                <div class="field">
+                  <label>Credit Limit (₺)</label>
+                  <input id="card-limit" type="number">
+                </div>
+                <div class="field">
+                  <label>Statement Closing Day</label>
+                  <input id="card-statement" type="number" min="1" max="31">
+                </div>
+                <div class="field span2">
+                  <label>Payment Grace Period (days)</label>
+                  <input id="card-grace" type="number" value="10">
+                </div>
+              </div>
+              <button class="btn" id="card-add">
+                Add Card
+              </button>
+            </div>
+            <div class="card">
+              <h3>My Cards</h3>
+              <div id="card-list"></div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+      <footer class="foot">
+        Your data is stored privately in your browser on this device. <button id="reset-btn">Clear all data</button>
+      </footer>
+      <div id="save-toast"></div>
+
+    </div>
+
+    <div id="notification-container"></div>
+
+  </body>
+
+  </html>
