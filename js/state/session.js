@@ -1,4 +1,4 @@
-const session = {
+export const session = {
     uid: null,
     workspaceId: null
 };
